@@ -19,6 +19,8 @@ app.get('/', (req, res) => {
     res.sendFile(`${basePath}/base.html`)
 })
 
+module.exports = app
+
 app.listen(PORT, () => {
     console.log(`Rodando na porta ${PORT} Padrin!`)
 })

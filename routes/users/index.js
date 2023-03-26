@@ -24,7 +24,7 @@ router.post('/save', (req, res) => {
                 return
             })
 
-    res.status(201).sendFile(`${basePath}/userForm.html`)
+    return res.status(201).sendFile(`${basePath}/userForm.html`)
 
 })
 
@@ -33,11 +33,16 @@ router.get('/:id', (req, res) => {
     conn.query(`SELECT * FROM users WHERE id = ${userId}`, (err, data) => {
         if (err) {
             console.log(err)
-            return
+            return res.status(500).send({ error: 'Internal server error' })
         }
 
         const user = data[0]
-        res.send({ user })
+
+        if (!user) {
+            return res.status(404).send({ error: 'User not found' })
+        }
+
+        return res.status(200).send({ user })
     })
 
 })
