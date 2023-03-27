@@ -14,7 +14,7 @@ router.post('/save', (req, res) => {
     
     conn.query(`INSERT INTO users (firstName, lastName, email, cpf, password_hash, birthDate) VALUES (
             '${FirstName}', '${LastName}', '${email}', '${cpf}', '${password_hash}', '${birthDate}'
-            )`, (err) => {
+            );`, (err) => {
                 if (err) throw err
                 return
             })
@@ -23,9 +23,20 @@ router.post('/save', (req, res) => {
 
 })
 
+router.get('/clients', (req, res) => {
+    conn.query(`SELECT * FROM users;`, (err, data) => {
+        if (err) {
+            console.log(err)
+            return res.status(500).send({ error: 'Internal server error' })
+        }
+
+        return res.status(200).json(data)
+    })
+})
+
 router.get('/:id', (req, res) => {
     const userId = req.params.id
-    conn.query(`SELECT * FROM users WHERE id = ${userId}`, (err, data) => {
+    conn.query(`SELECT * FROM users WHERE id = ${userId};`, (err, data) => {
         if (err) {
             console.log(err)
             return res.status(500).send({ error: 'Internal server error' })
@@ -44,7 +55,7 @@ router.get('/:id', (req, res) => {
 
 router.delete('/delete/:id', (req, res) => {
     const userId = req.params.id
-    conn.query(`DELETE FROM users WHERE id = ${userId}`, (err) => {
+    conn.query(`DELETE FROM users WHERE id = ${userId};`, (err) => {
         if (err) {
             console.log(err)
             return res.status(500).send({ error: 'Internal server error' })
@@ -57,7 +68,7 @@ router.delete('/delete/:id', (req, res) => {
 router.put('/edit/:id', (req, res) => {
     const userId = req.params.id
 
-    conn.query(`SELECT * FROM users WHERE id = ${userId}`, (err, data) => {
+    conn.query(`SELECT * FROM users WHERE id = ${userId};`, (err, data) => {
         if (err) {
             console.log(err)
             return
