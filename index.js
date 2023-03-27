@@ -1,6 +1,5 @@
 const express = require('express')
 const app = express()
-const path = require('path')
 const users = require('./routes/users')
 const products = require('./routes/products')
 
@@ -10,13 +9,11 @@ const PORT = 3000
     app.use(express.urlencoded({ extended: true }))
     app.use(express.json())
 
-const basePath = path.join(__dirname, 'templates')
-
 app.use('/user', users)
 app.use('/product', products)
 
 app.get('/', (req, res) => {
-    res.sendFile(`${basePath}/base.html`)
+    res.send('Página Inicial')
 })
 
 module.exports = app
