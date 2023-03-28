@@ -2,6 +2,9 @@ const { Router, json } = require('express')
 const express = require('express')
 const router = express.Router()
 const conn = require('../../db/index')
+const jwt = require('jsonwebtoken')
+const SECRET = 'danieltools'
+const middlewareAuth = require('../../auth/index')
 
 router.post('/save', (req, res) => {
     const FirstName = req.body.firstName
@@ -23,7 +26,30 @@ router.post('/save', (req, res) => {
 
 })
 
-router.get('/clients', (req, res) => {
+router.post('/login', (req, res) => {
+    const email = req.body.email
+    const password = req.body.password
+
+    conn.query(`SELECT * FROM users WHERE email = '${email}';`, (err, data) => {
+        if (err) {
+            console.log(err)
+            return res.status(500).send({ error: 'Internal server error' })
+        }
+
+        const userEmail = data[0].email
+        const userHash = data[0].password_hash
+        const userId = data[0].id
+        
+        if (email === userEmail && password === userHash) {
+            const token = jwt.sign({ userId: userId }, SECRET, { expiresIn: 300 })
+            return res.status(200).json({ auth: true, token})
+        } else {
+            res.sendStatus(401)
+        }
+    })
+})
+
+router.get('/clients', middlewareAuth, (req, res) => {
     conn.query(`SELECT * FROM users;`, (err, data) => {
         if (err) {
             console.log(err)
