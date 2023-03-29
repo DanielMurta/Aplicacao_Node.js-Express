@@ -18,8 +18,9 @@ router.post('/save', (req, res) => {
     conn.query(`INSERT INTO users (firstName, lastName, email, cpf, password_hash, birthDate) VALUES (
             '${FirstName}', '${LastName}', '${email}', '${cpf}', '${password_hash}', '${birthDate}'
             );`, (err) => {
-                if (err) throw err
-                return
+                if (err) {
+                    return res.status(500).send({ error: 'Internal server error' })
+                }      
             })
 
     return res.sendStatus(201)
@@ -28,11 +29,10 @@ router.post('/save', (req, res) => {
 
 router.post('/login', (req, res) => {
     const email = req.body.email
-    const password = req.body.password
+    const password = req.body.password_hash
 
     conn.query(`SELECT * FROM users WHERE email = '${email}';`, (err, data) => {
         if (err) {
-            console.log(err)
             return res.status(500).send({ error: 'Internal server error' })
         }
 
@@ -44,7 +44,7 @@ router.post('/login', (req, res) => {
             const token = jwt.sign({ userId: userId }, SECRET, { expiresIn: 300 })
             return res.status(200).json({ auth: true, token})
         } else {
-            res.sendStatus(401)
+            res.sendStatus(404)
         }
     })
 })
