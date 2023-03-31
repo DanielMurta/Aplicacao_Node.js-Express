@@ -6,67 +6,90 @@ const { getValidUser, existingUser } = require('./fixtures')
 const { response } = require('../../index')
 
 describe('User test Integration', () => {
-    it('POST /user/save Should return 201 if user is created', (done) => {
+    it('POST /user/save Should return 201 if user is created', async () => {
         const user = getValidUser()
-        request(app)
+        await request(app)
             .post('/user/save')
             .send(user)
             .expect(201)
-            .end((err, res) => {
-                if (err) done(err)
-                done()
-              })
     })
 
-    it('GET /user/:id Should return 200 if return user', (done) => {
-        request(app)
+    it('GET /user/:id Should return 200 if return user', async () => {
+        await request(app)
             .get('/user/1')
             .expect(200)
-            .end((err, res) => {
-                if (err) done(err)
-                done()
-            })
     })
     
-    it('GET /user/:id Should return 404 if invalid id', (done) => {
-        request(app)
-            .get('/user/59')
+    it('GET /user/:id Should return 404 if invalid id', async () => {
+        await request(app)
+            .get('/user/10245')
             .expect(404)
-            .end((err, res) => {
-                if (err) done(err)
-                done()
-            })
     })
 
-    it('POST /user/login should return 200 if login is successfuly', (done) => {
-        const {email, password_hash} = existingUser()
+    it('GET /user/clients Should return 200 if return users', async () => {
+        const { email, password_hash } = existingUser()
+        const { body } = await request(app)
+            .post('/user/login')
+            .send({email, password_hash})
+
+        const token = body.token
+
         request(app)
+            .get('/user/clients')
+            .set(`x-access-token`, `${token}`)
+            .expect(200)
+    })
+
+    it('GET /user/clients Should return 401 if return users', async () => {
+        const token = '1234'
+
+        request(app)
+            .get('/user/clients')
+            .set(`x-access-token`, `${token}`)
+            .expect(401)
+    })
+
+    it('POST /user/login should return 200 if login is successfuly', async () => {
+        const {email, password_hash} = existingUser()
+        await request(app)
             .post('/user/login')
             .send({email, password_hash})
             .expect(200)
             .expect('Content-Type', /json/)
-            .end((err, res) => {
-                if (err) {
-                    done(err)
-                } else {
-                    done()
-                }
-            })
+            
     })
 
-    it('POST /user/login should return 404 if user is not found', (done) => {
+    it('POST /user/login should return 404 if user is not found', async () => {
         const {email} = existingUser()
         const password_hash = '123'
-        request(app)
+        await request(app)
             .post('/user/login')
             .send({email, password_hash})
             .expect(404)
-            .end((err, res) => {
-                if (err) {
-                    done(err)
-                } else {
-                    done()
-                }
-            })
+           
     })
+    
+    it('DELETE /user/login should return 204 IF user was deleted', async () => {
+        const { email, password_hash } = existingUser()
+        const { body } = await request(app)
+            .post('/user/login')
+            .send({email, password_hash})
+
+        const token = body.token
+
+        await request(app)
+            .delete('/user/delete/23')
+            .set(`x-access-token`, `${token}`)
+            .expect(204)
+    })
+
+    it('DELETE /user/login should return 401 IF user was deleted', async () => {
+        const token = '1234'
+
+        await request(app)
+            .delete('/user/delete/23')
+            .set(`x-access-token`, `${token}`)
+            .expect(401)
+    })
+
 })
