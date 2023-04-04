@@ -87,15 +87,44 @@ router.delete('/delete/:id', middlewareAuth, (req, res) => {
 
 router.put('/edit/:id', (req, res) => {
     const userId = req.params.id
+    const { firstName, lastName, email, cpf, password_hash, birthDate } = req.body
+    const updates = []
 
-    conn.query(`SELECT * FROM users WHERE id = ${userId};`, (err, data) => {
+    if (firstName) {
+        updates.push(`firstName = '${firstName}'`)
+    }
+
+    if (lastName) {
+        updates.push(`lastName = '${lastName}'`)
+    }
+
+    if (email) {
+        updates.push(`email = '${email}'`)
+    }
+
+    if (cpf) {
+        updates.push(`cpf = '${cpf}'`)
+    }
+
+    if (password_hash) {
+        updates.push(`password_hash = '${password_hash}'`)
+    }
+
+    if (birthDate) {
+        updates.push(`birthDate = '${birthDate}'`)
+    }
+
+    conn.query(`UPDATE users SET ${updates.join(', ')} WHERE id = ${userId};`, (err, data) => {
         if (err) {
             console.log(err)
-            return
+            return res.status(500).send({ error: 'Internal server error' })
         }
 
-        const user = data[0]
-        res.sendFile(`${basePath}/editUser.html`, { user })
+        if (data.affectedRows === 0) {
+            return res.status(404).send({ error: 'User not found' })
+          }
+
+        return res.sendStatus(200)
     })
 })
 
