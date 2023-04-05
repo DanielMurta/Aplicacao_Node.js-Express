@@ -4,7 +4,7 @@ const router = express.Router()
 const conn = require('../../db/index')
 const jwt = require('jsonwebtoken')
 const SECRET = 'danieltools'
-const middlewareAuth = require('../../auth/index')
+const { middlewareAuth, authRole } = require('../../auth/index')
 
 router.post('/save', (req, res) => {
     const { firstName, lastName, cpf, birthDate, password_hash, email} = req.body
@@ -33,9 +33,10 @@ router.post('/login', (req, res) => {
         const userEmail = data[0].email
         const userHash = data[0].password_hash
         const userId = data[0].id
+        const userRole = data[0].role
         
         if (email === userEmail && password_hash === userHash) {
-            const token = jwt.sign({ userId: userId }, SECRET, { expiresIn: 300 })
+            const token = jwt.sign({ userId: userId, role: userRole }, SECRET, { expiresIn: 300 })
             return res.status(200).json({ auth: true, token})
         } else {
             res.sendStatus(404)
@@ -43,7 +44,7 @@ router.post('/login', (req, res) => {
     })
 })
 
-router.get('/clients', middlewareAuth, (req, res) => {
+router.get('/clients', middlewareAuth, authRole, (req, res) => {
     conn.query(`SELECT * FROM users;`, (err, data) => {
         if (err) {
             console.log(err)
@@ -123,6 +124,23 @@ router.put('/edit/:id', (req, res) => {
         if (data.affectedRows === 0) {
             return res.status(404).send({ error: 'User not found' })
           }
+
+        return res.sendStatus(200)
+    })
+})
+
+router.put('/editRole/:id', (req, res) => {
+    const userId = req.params.id 
+
+    conn.query(`UPDATE users SET role = 'admin' WHERE id = ${userId}`, (err, data) => {
+        if (err) {
+            console.log(err)
+            return res.status(500).send({ error: 'Internal server error' })
+        }
+
+        if (data.affectedRows === 0) {
+            return res.status(404).send({ error: 'User not found' })
+        }
 
         return res.sendStatus(200)
     })
