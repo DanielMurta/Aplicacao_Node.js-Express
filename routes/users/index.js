@@ -74,7 +74,7 @@ router.get('/:id', (req, res) => {
 
 })
 
-router.delete('/delete/:id', middlewareAuth, (req, res) => {
+router.delete('/delete/:id', middlewareAuth, authRole, (req, res) => {
     const userId = req.params.id
     conn.query(`DELETE FROM users WHERE id = ${userId};`, (err) => {
         if (err) {
@@ -86,7 +86,7 @@ router.delete('/delete/:id', middlewareAuth, (req, res) => {
     return res.sendStatus(204)
 })
 
-router.put('/edit/:id', (req, res) => {
+router.put('/edit/:id', middlewareAuth, (req, res) => {
     const userId = req.params.id
     const { firstName, lastName, email, cpf, password_hash, birthDate } = req.body
     const updates = []
@@ -115,7 +115,7 @@ router.put('/edit/:id', (req, res) => {
         updates.push(`birthDate = '${birthDate}'`)
     }
 
-    conn.query(`UPDATE users SET ${updates.join(', ')} WHERE id = ${userId};`, (err, data) => {
+    conn.query(`UPDATE users SET ${updates.join(', ')} WHERE id = ${parseInt(userId)};`, (err, data) => {
         if (err) {
             console.log(err)
             return res.status(500).send({ error: 'Internal server error' })
@@ -129,7 +129,7 @@ router.put('/edit/:id', (req, res) => {
     })
 })
 
-router.put('/editRole/:id', (req, res) => {
+router.put('/editRole/:id', middlewareAuth, authRole, (req, res) => {
     const userId = req.params.id 
 
     conn.query(`UPDATE users SET role = 'admin' WHERE id = ${userId}`, (err, data) => {
