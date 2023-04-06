@@ -2,9 +2,7 @@ const { Router, json } = require('express')
 const express = require('express')
 const router = express.Router()
 const conn = require('../../db/index')
-const jwt = require('jsonwebtoken')
-const SECRET = 'danieltools'
-const { middlewareAuth, authRole } = require('../../auth/index')
+const { generateToken, middlewareAuth, authRole } = require('../../auth/index')
 
 router.post('/save', (req, res) => {
     const { firstName, lastName, cpf, birthDate, password_hash, email} = req.body
@@ -36,7 +34,7 @@ router.post('/login', (req, res) => {
         const userRole = data[0].role
         
         if (email === userEmail && password_hash === userHash) {
-            const token = jwt.sign({ userId: userId, role: userRole }, SECRET, { expiresIn: 300 })
+            const token = generateToken({ userId: userId, role: userRole })
             return res.status(200).json({ auth: true, token})
         } else {
             res.sendStatus(404)

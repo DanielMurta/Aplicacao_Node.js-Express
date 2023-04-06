@@ -1,6 +1,9 @@
 const jwt = require('jsonwebtoken')
 const SECRET = 'danieltools'
-const conn = require('../db/index')
+
+const generateToken = (data) => {
+    return jwt.sign(data, SECRET, { expiresIn: 300 })
+}
 
 const middlewareAuth = (req, res, next) => {
     const token = req.headers['x-access-token']
@@ -23,4 +26,4 @@ const authRole = (req, res, next) => {
     }
 }
 
-module.exports = { middlewareAuth, authRole }
+module.exports = { generateToken, middlewareAuth, authRole }
