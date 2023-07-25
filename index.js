@@ -11,7 +11,7 @@ app.use('/user', users)
 app.use('/product', products)
 
 app.get('/', (req, res) => {
-    res.send('Página Inicial')
+    res.send('Home')
 })
 
 module.exports = app
