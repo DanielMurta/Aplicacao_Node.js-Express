@@ -20,10 +20,36 @@ router.post('/save', middlewareAuth, authRole, (req, res) => {
     return res.sendStatus(201)
 })
 
-router.delete('/delete/:id', middlewareAuth, authRole, (req, res) => {
-    const productUser = req.params.id
+router.get('/Allproducts', middlewareAuth, authRole, (req, res) => {
+    conn.query('SELECT * FROM products;', (err, data) => {
+        if (err) {
+            return res.status(500).send({ error: 'Internal server error' })
+        }
 
-    conn.query(`DELETE FROM products WHERE id = ${productUser};`, (err) => {
+        return res.status(200).json(data)
+    })
+})
+
+router.get('/:id', middlewareAuth, authRole, (req, res) => {
+    const productId = req.params.id
+
+    conn.query(`SELECT * FROM products WHERE id = ${productId};`, (err, data) => {
+        if (err) {
+            return res.status(500).send({ error: 'Internal server error' })
+        }
+
+        if (!data[0]) {
+            return res.status(404).send({ error: 'Product Not Found'})
+        }
+
+        return res.status(200).json(data)
+    })
+})
+
+router.delete('/delete/:id', middlewareAuth, authRole, (req, res) => {
+    const productId = req.params.id
+
+    conn.query(`DELETE FROM products WHERE id = ${productId};`, (err) => {
         if (err) {
             return res.status(500).send({ error: 'Internal server error' })
         }
