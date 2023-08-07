@@ -42,9 +42,9 @@ router.post('/login', (req, res) => {
     })
 })
 
-router.post('/:Userid/product', middlewareAuth, (req, res) => {
+router.post('/:Userid/product', (req, res) => {
     const {name, description, price} = req.body
-    const userId = req.userId
+    const userId = req.params.Userid
 
     conn.query(`INSERT INTO products (name, description, price, user_id) VALUES ('${name}', '${description}', ${price}, ${userId});`, 
     (err) => {
@@ -54,18 +54,6 @@ router.post('/:Userid/product', middlewareAuth, (req, res) => {
     })
 
     return res.sendStatus(201)
-})
-
-router.get('/AllproductsByUser_id', middlewareAuth, (req, res) => {
-    const userId = req.userId
-
-    conn.query(`SELECT * FROM products WHERE user_id = ${userId};`, (err, data) => {
-        if (err){
-            return res.status(500).send({ error: 'Internal server error' })
-        }
-
-        return res.status(200).json(data)
-    })
 })
 
 router.get('/clients', middlewareAuth, authRole, (req, res) => {
@@ -112,6 +100,21 @@ router.get('/:Userid/Allproducts', middlewareAuth, (req, res)=> {
 
         return res.status(200).json(data)
     })
+})
+
+router.get('/users/pagination', middlewareAuth, (req, res) => {
+    const { limit = 5, page = 1 } = req.query;
+    const offset = (page - 1) * limit;
+    
+    conn.query(`SELECT * FROM users LIMIT ${limit} OFFSET ${offset};`, (err, data) => {
+        if (err) {
+            console.log(err)
+            return res.status(500).send({ error: 'Internal server error' })
+        }
+
+        return res.status(200).json(data)
+    })
+
 })
 
 router.delete('/delete/:id', middlewareAuth, authRole, (req, res) => {
