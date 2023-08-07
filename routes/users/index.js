@@ -51,10 +51,21 @@ router.post('/:Userid/product', middlewareAuth, (req, res) => {
         if (err) {
             return res.status(500).send({ error: 'Internal server error'})
         }
-
     })
 
     return res.sendStatus(201)
+})
+
+router.get('/AllproductsByUser_id', middlewareAuth, (req, res) => {
+    const userId = req.userId
+
+    conn.query(`SELECT * FROM products WHERE user_id = ${userId};`, (err, data) => {
+        if (err){
+            return res.status(500).send({ error: 'Internal server error' })
+        }
+
+        return res.status(200).json(data)
+    })
 })
 
 router.get('/clients', middlewareAuth, authRole, (req, res) => {
