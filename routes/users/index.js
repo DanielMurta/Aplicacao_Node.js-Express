@@ -42,6 +42,21 @@ router.post('/login', (req, res) => {
     })
 })
 
+router.post('/:Userid/product', middlewareAuth, (req, res) => {
+    const {name, description, price} = req.body
+    const userId = req.userId
+
+    conn.query(`INSERT INTO products (name, description, price, user_id) VALUES ('${name}', '${description}', ${price}, ${userId});`, 
+    (err) => {
+        if (err) {
+            return res.status(500).send({ error: 'Internal server error'})
+        }
+
+    })
+
+    return res.sendStatus(201)
+})
+
 router.get('/clients', middlewareAuth, authRole, (req, res) => {
     conn.query(`SELECT * FROM users;`, (err, data) => {
         if (err) {
@@ -70,6 +85,22 @@ router.get('/:id', (req, res) => {
         return res.status(200).json(user)
     })
 
+})
+
+router.get('/:Userid/Allproducts', middlewareAuth, (req, res)=> {
+    const userId = req.params.Userid
+
+    conn.query(`SELECT * FROM products WHERE user_id = ${userId};`, (err, data) => {
+        if (err) {
+            return res.status(500).send({ error: 'Internal server error' })
+        }
+
+        if (!data[0]) {
+            return res.status(404).send({ error: 'Product Not Found'})
+        }
+
+        return res.status(200).json(data)
+    })
 })
 
 router.delete('/delete/:id', middlewareAuth, authRole, (req, res) => {
