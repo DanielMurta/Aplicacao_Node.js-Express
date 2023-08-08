@@ -30,6 +30,19 @@ router.get('/Allproducts', middlewareAuth, authRole, (req, res) => {
     })
 })
 
+router.get('/products', middlewareAuth, (req, res) => {
+    const { page = 1, limit = 5} = req.query
+    const offset = (page - 1) * limit
+
+    conn.query(`SELECT * FROM products LIMIT ${limit} OFFSET ${offset};`, (err, data)=> {
+        if (err){
+            return res.status(500).send({ error: 'Internal server error' })
+        }
+
+        return res.status(200).json(data)
+    })
+})
+
 router.get('/:id', middlewareAuth, authRole, (req, res) => {
     const productId = req.params.id
 
@@ -56,6 +69,37 @@ router.delete('/delete/:id', middlewareAuth, authRole, (req, res) => {
     })
 
     return res.sendStatus(204)
+})
+
+router.put('/edit/:id', middlewareAuth, authRole, (req, res)=> {
+    const { name, description, price } = req.body
+    const productId = req.params.id
+    const updates = []
+
+    if (name) {
+        updates.push(`name = '${name}'`)
+    }
+
+    if (description) {
+        updates.push(`description = '${description}'`)
+    }
+
+    if (price) {
+        updates.push(`price = '${price}'`)
+    }
+
+    conn.query(`UPDATE products SET ${updates.join(', ')} WHERE id = ${productId};`, (err, data) => {
+        if (err){
+            return res.status(500).send({ error: 'Internal server error' })
+        }
+
+        if (data.affectedRows === 0) {
+            return res.status(404).send({ error: 'User not found' })
+          }
+
+        return res.sendStatus(200)
+    })
+
 })
 
 module.exports = router
