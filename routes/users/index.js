@@ -67,6 +67,20 @@ router.get('/clients', middlewareAuth, authRole, (req, res) => {
     })
 })
 
+router.get('/users', middlewareAuth, (req, res) => {
+    const { limit = 5, page = 1 } = req.query
+    const offset = (page - 1) * limit
+    
+    conn.query(`SELECT * FROM users LIMIT ${limit} OFFSET ${offset};`, (err, data) => {
+        if (err) {
+            console.log(err)
+            return res.status(500).send({ error: 'Internal server error' })
+        }
+
+        return res.status(200).json(data)
+    })
+})
+
 router.get('/:id', (req, res) => {
     const userId = req.params.id
     conn.query(`SELECT * FROM users WHERE id = ${userId};`, (err, data) => {
@@ -102,20 +116,6 @@ router.get('/:Userid/Allproducts', middlewareAuth, (req, res)=> {
     })
 })
 
-router.get('/users/pagination', middlewareAuth, (req, res) => {
-    const { limit = 5, page = 1 } = req.query;
-    const offset = (page - 1) * limit;
-    
-    conn.query(`SELECT * FROM users LIMIT ${limit} OFFSET ${offset};`, (err, data) => {
-        if (err) {
-            console.log(err)
-            return res.status(500).send({ error: 'Internal server error' })
-        }
-
-        return res.status(200).json(data)
-    })
-
-})
 
 router.delete('/delete/:id', middlewareAuth, authRole, (req, res) => {
     const userId = req.params.id
