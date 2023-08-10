@@ -28,7 +28,7 @@ router.get('/Allproducts', middlewareAuth, authRole, (req, res) => {
     })
 })
 
-router.get('/products', (req, res) => {
+router.get('/products', middlewareAuth, (req, res) => {
     const { page = 1, limit = 5} = req.query
     const offset = (page - 1) * limit
 
