@@ -8,9 +8,8 @@ router.post('/save', (req, res) => {
     const { firstName, lastName, cpf, birthDate, password_hash, email} = req.body
 
     
-    conn.query(`INSERT INTO users (firstName, lastName, email, cpf, password_hash, birthDate) VALUES (
-            '${firstName}', '${lastName}', '${email}', '${cpf}', '${password_hash}', '${birthDate}'
-            );`, (err) => {
+    conn.query(`INSERT INTO users (firstName, lastName, email, cpf, password_hash, birthDate) VALUES (?, ?, ?, ?, ?, ?);`, 
+    [firstName, lastName, email, cpf, password_hash, birthDate], (err) => {
                 if (err) {
                     return res.status(500).send({ error: 'Internal server error' })
                 }      
@@ -23,7 +22,7 @@ router.post('/save', (req, res) => {
 router.post('/login', (req, res) => {
     const { email, password_hash } = req.body
 
-    conn.query(`SELECT * FROM users WHERE email = '${email}';`, (err, data) => {
+    conn.query(`SELECT * FROM users WHERE email = ?;`, [email], (err, data) => {
         if (err) {
             return res.status(500).send({ error: 'Internal server error' })
         }
@@ -42,11 +41,11 @@ router.post('/login', (req, res) => {
     })
 })
 
-router.post('/:Userid/product', (req, res) => {
+router.post('/:Userid/product', middlewareAuth, (req, res) => {
     const {name, description, price} = req.body
     const userId = req.params.Userid
 
-    conn.query(`INSERT INTO products (name, description, price, user_id) VALUES ('${name}', '${description}', ${price}, ${userId});`, 
+    conn.query(`INSERT INTO products (name, description, price, user_id) VALUES (?, ?, ?, ?);`, [name, description, price, userId],
     (err) => {
         if (err) {
             return res.status(500).send({ error: 'Internal server error'})
@@ -71,7 +70,7 @@ router.get('/users', middlewareAuth, (req, res) => {
     const { limit = 5, page = 1 } = req.query
     const offset = (page - 1) * limit
     
-    conn.query(`SELECT * FROM users LIMIT ${limit} OFFSET ${offset};`, (err, data) => {
+    conn.query(`SELECT * FROM users LIMIT ? OFFSET ?;`, [parseInt(limit), offset], (err, data) => {
         if (err) {
             console.log(err)
             return res.status(500).send({ error: 'Internal server error' })
@@ -81,9 +80,9 @@ router.get('/users', middlewareAuth, (req, res) => {
     })
 })
 
-router.get('/:id', (req, res) => {
+router.get('/:id', middlewareAuth, (req, res) => {
     const userId = req.params.id
-    conn.query(`SELECT * FROM users WHERE id = ${userId};`, (err, data) => {
+    conn.query(`SELECT * FROM users WHERE id = ?;`, [userId] , (err, data) => {
         if (err) {
             console.log(err)
             return res.status(500).send({ error: 'Internal server error' })
@@ -103,7 +102,7 @@ router.get('/:id', (req, res) => {
 router.get('/:Userid/Allproducts', middlewareAuth, (req, res)=> {
     const userId = req.params.Userid
 
-    conn.query(`SELECT * FROM products WHERE user_id = ${userId};`, (err, data) => {
+    conn.query(`SELECT * FROM products WHERE user_id = ?;`, [userId], (err, data) => {
         if (err) {
             return res.status(500).send({ error: 'Internal server error' })
         }
@@ -119,7 +118,7 @@ router.get('/:Userid/Allproducts', middlewareAuth, (req, res)=> {
 
 router.delete('/delete/:id', middlewareAuth, authRole, (req, res) => {
     const userId = req.params.id
-    conn.query(`DELETE FROM users WHERE id = ${userId};`, (err) => {
+    conn.query(`DELETE FROM users WHERE id = ?;`, [userId], (err) => {
         if (err) {
             console.log(err)
             return res.status(500).send({ error: 'Internal server error' })
@@ -133,32 +132,43 @@ router.put('/edit/:id', middlewareAuth, (req, res) => {
     const userId = req.params.id
     const { firstName, lastName, email, cpf, password_hash, birthDate } = req.body
     const updates = []
+    const queryParams = []
+    let query = 'UPDATE users SET '
 
     if (firstName) {
-        updates.push(`firstName = '${firstName}'`)
+        updates.push('firstName = ?')
+        queryParams.push(firstName)
     }
 
     if (lastName) {
-        updates.push(`lastName = '${lastName}'`)
+        updates.push('lastName = ?')
+        queryParams.push(lastName)
     }
 
     if (email) {
-        updates.push(`email = '${email}'`)
+        updates.push('email = ?')
+        queryParams.push(email)
     }
 
     if (cpf) {
-        updates.push(`cpf = '${cpf}'`)
+        updates.push('cpf = ?')
+        queryParams.push(cpf)
     }
 
     if (password_hash) {
-        updates.push(`password_hash = '${password_hash}'`)
+        updates.push('password_hash = ?')
+        queryParams.push(password_hash)
     }
 
     if (birthDate) {
-        updates.push(`birthDate = '${birthDate}'`)
+        updates.push('birthDate = ?')
+        queryParams.push(birthDate)
     }
 
-    conn.query(`UPDATE users SET ${updates.join(', ')} WHERE id = ${parseInt(userId)};`, (err, data) => {
+    query += updates.join(', ') + ' WHERE id = ?'
+    queryParams.push(parseInt(userId))
+
+    conn.query(query, queryParams, (err, data) => {
         if (err) {
             console.log(err)
             return res.status(500).send({ error: 'Internal server error' })
@@ -175,7 +185,7 @@ router.put('/edit/:id', middlewareAuth, (req, res) => {
 router.put('/editRole/:id', middlewareAuth, authRole, (req, res) => {
     const userId = req.params.id 
 
-    conn.query(`UPDATE users SET role = 'admin' WHERE id = ${userId}`, (err, data) => {
+    conn.query(`UPDATE users SET role = 'admin' WHERE id = ?`, [userId], (err, data) => {
         if (err) {
             console.log(err)
             return res.status(500).send({ error: 'Internal server error' })
