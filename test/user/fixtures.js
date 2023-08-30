@@ -16,7 +16,14 @@ const existingUser = () => ({
     birthDate: '1996-04-12'  
 })
 
+const getValidProduct = () => ({  
+    name: "product7",
+    description: "description of product 7",
+    price: 782.50 
+})
+
 module.exports = {
     getValidUser,
     existingUser,
+    getValidProduct
 }

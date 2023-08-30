@@ -4,13 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test/**/test.js",
+    "test": "nyc mocha test/**/*spec.js",
     "start": "nodemon server.js localhost 3000"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "c8": "^8.0.1",
     "chai": "^4.3.7",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
@@ -20,6 +21,7 @@
     "supertest": "^6.3.3"
   },
   "devDependencies": {
-    "nodemon": "^2.0.21"
+    "nodemon": "^2.0.21",
+    "nyc": "^15.1.0"
   }
 }
