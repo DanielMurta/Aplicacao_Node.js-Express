@@ -3,8 +3,9 @@ const express = require('express')
 const router = express.Router()
 const conn = require('../../db/index')
 const { generateToken, middlewareAuth, authRole } = require('../../auth/index')
+const service = require('./service')
 
-router.post('/save', (req, res) => {
+router.post('/save', async (req, res) => {
     const { firstName, lastName, cpf, birthDate, password_hash, email} = req.body
 
     
@@ -16,7 +17,6 @@ router.post('/save', (req, res) => {
             })
 
     return res.sendStatus(201)
-
 })
 
 router.post('/login', (req, res) => {
@@ -58,7 +58,6 @@ router.post('/:Userid/product', middlewareAuth, (req, res) => {
 router.get('/clients', middlewareAuth, authRole, (req, res) => {
     conn.query(`SELECT * FROM users;`, (err, data) => {
         if (err) {
-            console.log(err)
             return res.status(500).send({ error: 'Internal server error' })
         }
 
@@ -72,7 +71,6 @@ router.get('/users', middlewareAuth, (req, res) => {
     
     conn.query(`SELECT * FROM users LIMIT ? OFFSET ?;`, [parseInt(limit), offset], (err, data) => {
         if (err) {
-            console.log(err)
             return res.status(500).send({ error: 'Internal server error' })
         }
 
@@ -84,7 +82,6 @@ router.get('/:id', middlewareAuth, (req, res) => {
     const userId = req.params.id
     conn.query(`SELECT * FROM users WHERE id = ?;`, [userId] , (err, data) => {
         if (err) {
-            console.log(err)
             return res.status(500).send({ error: 'Internal server error' })
         }
 
@@ -120,7 +117,6 @@ router.delete('/delete/:id', middlewareAuth, authRole, (req, res) => {
     const userId = req.params.id
     conn.query(`DELETE FROM users WHERE id = ?;`, [userId], (err) => {
         if (err) {
-            console.log(err)
             return res.status(500).send({ error: 'Internal server error' })
         } 
     })
@@ -170,7 +166,6 @@ router.put('/edit/:id', middlewareAuth, (req, res) => {
 
     conn.query(query, queryParams, (err, data) => {
         if (err) {
-            console.log(err)
             return res.status(500).send({ error: 'Internal server error' })
         }
 
@@ -187,7 +182,6 @@ router.put('/editRole/:id', middlewareAuth, authRole, (req, res) => {
 
     conn.query(`UPDATE users SET role = 'admin' WHERE id = ?`, [userId], (err, data) => {
         if (err) {
-            console.log(err)
             return res.status(500).send({ error: 'Internal server error' })
         }
 
