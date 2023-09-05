@@ -3,7 +3,6 @@ const express = require('express')
 const router = express.Router()
 const conn = require('../../db/index')
 const { generateToken, middlewareAuth, authRole } = require('../../auth/index')
-const service = require('./service')
 
 router.post('/save', async (req, res) => {
     const { firstName, lastName, cpf, birthDate, password_hash, email} = req.body
@@ -173,7 +172,7 @@ router.put('/edit/:id', middlewareAuth, (req, res) => {
             return res.status(404).send({ error: 'User not found' })
           }
 
-        return res.sendStatus(200)
+        return res.status(200).json(data)
     })
 })
 
@@ -189,7 +188,7 @@ router.put('/editRole/:id', middlewareAuth, authRole, (req, res) => {
             return res.status(404).send({ error: 'User not found' })
         }
 
-        return res.sendStatus(200)
+        return res.status(200).json(data)
     })
 })
 
